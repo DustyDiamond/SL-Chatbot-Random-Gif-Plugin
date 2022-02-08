@@ -1,0 +1,9 @@
+{
+  "output_file": "settings.json",
+  "command": {
+    "type": "textbox",
+    "value": "!gif",
+    "label": "Command",
+    "tooltip": "The Command to get your Team."
+  }
+}
