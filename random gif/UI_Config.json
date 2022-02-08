@@ -5,5 +5,11 @@
     "value": "!gif",
     "label": "Command",
     "tooltip": "The Command to get your Team."
+  },
+  "folder": {
+    "type": "textbox",
+    "value": "",
+    "label": "GIF Folder",
+    "tooltip": "The Path to your GIF Folder"
   }
 }

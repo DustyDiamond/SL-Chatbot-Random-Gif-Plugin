@@ -1,5 +1,6 @@
 {
     "command": "!gif",
+    "folder": "",
     "permission": "Everyone",
     "cooldown": 30,
     "bot_response": "Hier GIF einfügen",
