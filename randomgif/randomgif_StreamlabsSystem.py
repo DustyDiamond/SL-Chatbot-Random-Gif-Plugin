@@ -28,7 +28,7 @@ def Init():
             "command": "!gif",
             "permission": "Everyone",
             "cooldown": 30,
-            "bot_response": "Hier GIF einfügen",
+            "bot_response": "Hier GIF einfuegen",
             "onCooldown": "$user, $command is still on cooldown for $cd seconds!",
 	        "onUserCooldown": "$user, $command is still on user cooldown for $cd seconds! "
         }
