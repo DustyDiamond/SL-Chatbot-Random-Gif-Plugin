@@ -1,4 +1,3 @@
-from dataclasses import replace
 import os
 import json
 import codecs
@@ -61,7 +60,7 @@ def Execute(data):
         
     if data.IsChatMessage() and data.GetParam(0) == settings["command"]:
         game = getGame("cogefee")
-        game = replace(game, " ", "")
+        game = game.replace(" ", "")
         location = GifDir
 
         
