@@ -4,12 +4,15 @@
     "type": "textbox",
     "value": "!gif",
     "label": "Command",
-    "tooltip": "The Command to get your Team."
+    "tooltip": "The Command to get your Team.",
+    "group": "General Settings"
   },
   "folder": {
-    "type": "textbox",
-    "value": "",
-    "label": "GIF Folder",
-    "tooltip": "The Path to your GIF Folder"
+    "type": "button",
+    "label": "Open GIF Folder",
+    "tooltip": "Opens the directory with your GIFs",
+    "function": "OpenGifDir",
+    "wsevent": "",
+    "group": "General Settings"
   }
 }
