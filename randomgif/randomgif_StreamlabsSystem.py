@@ -3,9 +3,7 @@ import json
 import codecs
 import random
 import time
-import PIL
 from shutil import copyfile
-
 from datetime import datetime
 
 ScriptName = "Random Gif Command"
