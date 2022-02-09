@@ -53,7 +53,7 @@ def send_message(message):
 def Execute(data):
     global game, GifDir
     message = ""
-    if data.IsChatMessage() and data.GetParam(0) == "!getgame":
+    if data.IsChatMessage() and data.GetParam(0) == "!getgame" and Parent.HasPermission(data.User, "Moderator", ""):
         game = getGame("cogefee")
         game = replace(game, " ", "")
         message = "Current Game is: " + game
@@ -68,8 +68,11 @@ def Execute(data):
     return
 
 
-def getGame(channel = Parent.GetChannelName()):
+def getGame(channel):
     global game, jsonData
+    if channel == "":
+        channel = Parent.GetChannelName()
+    
     jsonData = json.loads(Parent.GetRequest("https://decapi.me/twitch/game/" + channel, {}))
     game = jsonData["response"]
     return game
