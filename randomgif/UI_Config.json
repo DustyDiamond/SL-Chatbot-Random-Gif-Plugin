@@ -5,7 +5,7 @@
     "value": "!gif",
     "label": "Command",
     "tooltip": "The Command to get your Team.",
-    "group": "General Settings"
+    "group": "General Settings:"
   },
   "folder": {
     "type": "button",
@@ -13,6 +13,26 @@
     "tooltip": "Opens the directory with your GIFs",
     "function": "OpenGifDir",
     "wsevent": "",
-    "group": "General Settings"
+    "group": "General Settings:"
+  },
+  "delay": {
+    "type": "slider",
+    "value": 2,
+    "label": "Duration of displayed gifs",
+    "min": 0,
+    "max": 30,
+    "ticks": 1,
+    "tooltip": "The Name of Your Scene, where all your gifs are in SLOBS",
+    "group": "GIF Settings:"
+  },
+  "gifsize": {
+    "type": "slider",
+    "value": 600,
+    "label": "Width of displayed GIFs",
+    "min": 100,
+    "max": 1200,
+    "ticks": 100,
+    "tooltip": "The Width of your GIFs. Note that you should check your source in SLOBS after changing that value!",
+    "group": "GIF Settings:"
   }
 }
