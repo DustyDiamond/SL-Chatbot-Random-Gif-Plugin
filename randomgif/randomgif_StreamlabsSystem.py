@@ -10,7 +10,7 @@ ScriptName = "Random Gif Command"
 Website = "http://www.dustydiamond.de/"
 Description = "Chooses a suitable gif for the game you're streaming on twitch"
 Creator = "DustyDiamond"
-Version = "1.0.0"
+Version = "1.0.1"
 Command = "!gif"
 
 settings = {}
