@@ -24,26 +24,5 @@
     "label": "GIF Scene Name",
     "tooltip": "The SLOBS Scene where you have your gifs",
     "group": "GIF Settings:"
-  },
-  "apiaddress": {
-    "type": "textbox",
-    "value": "http://127.0.0.1",
-    "label": "API Adress",
-    "tooltip": "Usually you can leave this as is. If you select a different Adress in SLOBS or are running SLOBS and Chatbot on different machines you have to change this.",
-    "group": "API Settings:"
-  },
-  "apiport": {
-    "type": "textbox",
-    "value": "59650",
-    "label": "API Port",
-    "tooltip": "Usually you can leave this as is. If you select a different port in SLOBS you have to change this.",
-    "group": "API Settings:"
-  },
-  "token": {
-    "type": "textbox",
-    "value": "",
-    "label": "SLOBS Auth token",
-    "tooltip": "The Token from SLOBS Remote Control",
-    "group": "CREDENTIALS DO NOT SHOW:"
   }
 }

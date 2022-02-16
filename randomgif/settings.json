@@ -6,8 +6,5 @@
     "onCooldown": "$user, $command is still on cooldown for $cd seconds!",
 	"onUserCooldown": "$user, $command is still on user cooldown for $cd seconds! ",
     "delay": 2,
-    "scene": "gifs",
-    "apiaddress": "http://127.0.0.1",
-    "apiport": "59650",
-    "token": "80a789d5ac6fa26857691754ea0fe139e68ee"
+    "scene": "gifs"
 }
