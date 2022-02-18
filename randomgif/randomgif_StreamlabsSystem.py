@@ -43,6 +43,7 @@ RegObsReplaySwap = None
 # misc
 settings = {}
 game = ""
+work_dir = ""
 
 #---------------------------------------------------------
 # Functions
@@ -73,10 +74,11 @@ def Init():
 
     # Init for rest of script
     # Globals misc
-    global settings
+    global settings, work_dir
 
 
     work_dir = os.path.dirname(__file__)
+    settings["work_dir"] = work_dir
 
     try:
         with codecs.open(os.path.join(work_dir, "settings.json"), encoding='utf-8-sig') as json_file:
@@ -118,7 +120,7 @@ def send_message(message):
 # twitch chat. data contains info about message and user etc
 #---------------------------------------------------------
 def Execute(data):
-    global game
+    global game, settings
     message = ""
     max = 0
     number = 0
@@ -146,16 +148,24 @@ def Execute(data):
     if data.IsChatMessage() and data.GetParam(0) == settings["command"]:
         # get Max from Nr of Sources in Scene
         bridge_answer = GetItems(scene)
-        log(bridge_answer)
-        max = 1
-
+        #log("Bridge Answer: " + bridge_answer)
+        
         temp = bridge_answer
-        log(temp)
-        temp = left(temp, len(temp)-1)
-        temp = right(temp, len(temp)-8)
+        #temp = left(temp, len(temp)-1)
+        #temp = right(temp, len(temp)-1)
         scene_list = temp.split(",")
-        max = scene_list.count(game)
-        log(str(max))
+
+        for i in scene_list:
+            #log(i)
+            i = left(i, i.find("-"))
+            if i == game:
+                max = max + 1
+
+        #log("Max: " + str(max))
+
+        if max <= 0:
+            max = 1
+
         # get random number to determine
         if data.GetParam(1) != "":
             try:
@@ -169,7 +179,7 @@ def Execute(data):
 
         gif = game + "-" + str(number)
 
-        log("Max: " + str(max) + " - Rand: " + str(number))
+        #log("Max: " + str(max) + " - Rand: " + str(number))
 
         delay = str(settings["delay"])
         #message = '$SLOBSsourceT("' + gif + '", "onoff", "' + delay + '", "gifs")'
@@ -217,8 +227,20 @@ def mid(s, offset, amount):
 # SLOBS RC Functions
 #---------------------------------------------------------
 def GetItems(scene):
+    #global settings
     """ Get Items contained in given Scene """
-    return os.popen("{0} get_items \"{1}\"".format(BridgeApp,scene)).read()
+    os.popen("{0} get_items \"{1}\"".format(BridgeApp,scene)).read()
+    #work_dir = settings["work_dir"]
+    work_dir = os.path.dirname(__file__)
+    scene_loc = os.path.join(work_dir, "bridge\\sources.txt")
+    sources = ""
+    with open(scene_loc, "r") as file:
+        lines = file.readlines()
+
+    for line in lines:
+        sources = sources + line + "\n"
+
+    return sources
 
 def ChangeScene(scene, delay=None):
 	""" Change to scene. """
