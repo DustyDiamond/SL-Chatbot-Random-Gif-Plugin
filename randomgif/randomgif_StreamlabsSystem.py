@@ -155,6 +155,8 @@ def Execute(data):
         #temp = right(temp, len(temp)-1)
         scene_list = temp.split(",")
 
+        last = settings["last"]
+        
         for i in scene_list:
             #log(i)
             i = left(i, i.find("-"))
@@ -171,12 +173,13 @@ def Execute(data):
             try:
                 number = int(data.GetParam(1))
                 if number > max:
-                    number = random.randint(1,max)
+                    number = exclusive_rand(last,max)
             except:
-                number = random.randint(1,max)
+                number = exclusive_rand(last,max)
         else:  
-            number = random.randint(1,max)
+            number = exclusive_rand(last,max)
 
+        settings["last"] = number
         gif = game + "-" + str(number)
 
         #log("Max: " + str(max) + " - Rand: " + str(number))
@@ -188,6 +191,17 @@ def Execute(data):
     send_message(message)
     return
 
+def exclusive_rand(last, max):
+    global settings
+    rand = 0
+    if (settings["notlast"]):
+        while rand == last:
+            rand = random.randint(1,max)
+
+    else:
+        rand = random.randint(1,max)
+
+    return rand
 
 #---------------------------------------------------------
 # calls decapi to get current game on twitch for channel owner

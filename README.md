@@ -8,6 +8,8 @@ Name your Gif-Sources as `<game-name>-<nr> (heroesofthestorm-1)` make sure there
 With command `!getgame` you can read out your current game, the way the script interpretes the game. Take that exact game name to name your gifs.  
 You can place your gifs in the scene as you wish. Then import that "gif-scene" into your live scenes or whereever you want to display your gifs. Make sure to set the name of the scene where your gifs are stored in chatbot settings.  
 
+You can toggle on/off if you want the gif that last has been played to be excluded for the next command, so everytime there is choosen a different gif. This is especially helpful if you don't have that many gifs per game.  
+
 ## Dependencies  
 
 The script uses the SLOBS RC CONSOLE Application from [ocgineer](https://github.com/ocgineer). You can find it [here](https://github.com/ocgineer/SLOBS-RC-CONSOLE)  

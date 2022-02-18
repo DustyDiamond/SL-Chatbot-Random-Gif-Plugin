@@ -7,5 +7,7 @@
 	"onUserCooldown": "$user, $command is still on user cooldown for $cd seconds! ",
     "delay": 2,
     "scene": "gifs",
-    "work_dir": ""
+    "work_dir": "",
+    "last": 0,
+    "notlast": true
 }

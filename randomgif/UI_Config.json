@@ -24,5 +24,12 @@
     "label": "GIF Scene Name",
     "tooltip": "The Name of Your Scene, where all your gifs are in SLOBS",
     "group": "GIF Settings:"
+  },
+  "notlast": {
+    "type": "checkbox",
+    "value": true,
+    "label": "Exclude Last Gif",
+    "tooltip": "Exclude the last played gif from selection for next gif.",
+    "group": "GIF Settings:"
   }
 }
