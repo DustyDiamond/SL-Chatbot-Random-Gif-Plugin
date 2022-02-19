@@ -23,7 +23,7 @@ ScriptName = "Random Gif Command"
 Website = "http://www.dustydiamond.de/"
 Description = "Chooses a suitable gif for the game you're streaming on twitch."
 Creator = "DustyDiamond"
-Version = "1.0.2"
+Version = "1.0.3"
 Command = "!gif"
 
 #---------------------------------------------------------
@@ -41,9 +41,11 @@ RegObsSwap = None
 RegObsReplaySwap = None
 
 # misc
+global  settings, game, work_dir, last
 settings = {}
 game = ""
 work_dir = ""
+last = []
 
 #---------------------------------------------------------
 # Functions
@@ -120,7 +122,7 @@ def send_message(message):
 # twitch chat. data contains info about message and user etc
 #---------------------------------------------------------
 def Execute(data):
-    global game, settings
+    global game, settings, last
     message = ""
     max = 0
     number = 0
@@ -134,16 +136,6 @@ def Execute(data):
     if data.IsChatMessage() and data.GetParam(0) == "!getgame" and Parent.HasPermission(data.User, "Moderator", ""):
         message = "Current Game is: " + game
 
-    # !getscenes 
-    #if data.IsChatMessage() and data.GetParam(0) == "!getscenes" and Parent.HasPermission(data.User, "Moderator", ""):
-        #result = getobsscenes()
-        #log(result)
-        
-    # !getsources
-    #if data.IsChatMessage() and data.GetParam(0) == "!getsources" and Parent.HasPermission(data.User, "Moderator", ""):
-        #result = getsceneitems()
-        #log(result)
-
     # main branch 
     if data.IsChatMessage() and data.GetParam(0) == settings["command"]:
         # get Max from Nr of Sources in Scene
@@ -151,12 +143,8 @@ def Execute(data):
         #log("Bridge Answer: " + bridge_answer)
         
         temp = bridge_answer
-        #temp = left(temp, len(temp)-1)
-        #temp = right(temp, len(temp)-1)
         scene_list = temp.split(",")
 
-        last = settings["last"]
-        
         for i in scene_list:
             #log(i)
             i = left(i, i.find("-"))
@@ -168,22 +156,26 @@ def Execute(data):
         if max <= 0:
             max = 1
 
+        #i=0
+        #while i<=100:
+        #    log(str(i) + ": " + str(exclusive_rand(max)))
+        #    i=i+1
+
         # get random number to determine
         if data.GetParam(1) != "":
             try:
                 number = int(data.GetParam(1))
                 if number > max:
-                    number = exclusive_rand(last,max)
+                    number = exclusive_rand(max)
             except:
-                number = exclusive_rand(last,max)
+                number = exclusive_rand(max)
         else:  
-            number = exclusive_rand(last,max)
+            number = exclusive_rand(max)
+        
 
-        settings["last"] = number
         gif = game + "-" + str(number)
-
         #log("Max: " + str(max) + " - Rand: " + str(number))
-
+        
         delay = str(settings["delay"])
         #message = '$SLOBSsourceT("' + gif + '", "onoff", "' + delay + '", "gifs")'
         SetSourceVisibilityTimed(gif,"onoff",delay,scene)
@@ -191,17 +183,23 @@ def Execute(data):
     send_message(message)
     return
 
-def exclusive_rand(last, max):
-    global settings
-    rand = 0
-    if (settings["notlast"]):
-        while rand == last:
-            rand = random.randint(1,max)
-
+def exclusive_rand(x):
+    global settings, last
+    y = 2
+    if x <= y:
+        y = 1
+    if (settings["notlast"]) :
+        s = set(range(0,x+y))
+        reduced_list = list(s-(set(last)))
+        i = random.randint(1,len(reduced_list))
+        last.append(reduced_list[i])
+        if len(last)>y:
+            last.pop(0)
+        ret = reduced_list[i]
     else:
-        rand = random.randint(1,max)
+        ret = random.randint(1,x)
 
-    return rand
+    return ret
 
 #---------------------------------------------------------
 # calls decapi to get current game on twitch for channel owner
@@ -259,62 +257,62 @@ def GetItems(scene):
 def ChangeScene(scene, delay=None):
 	""" Change to scene. """
 	if delay:
-		log(os.popen("{0} change_scene \"{1}\" {2}".format(BridgeApp, scene, delay)).read())
+		os.popen("{0} change_scene \"{1}\" {2}".format(BridgeApp, scene, delay)).read()
 	else:
-		log(os.popen("{0} change_scene \"{1}\"".format(BridgeApp, scene)).read())
+		os.popen("{0} change_scene \"{1}\"".format(BridgeApp, scene)).read()
 	return
 
 def ChangeSceneTimed(scene, delay, returnscene=None):
 	""" Swap to scene and then back or to optional given scene. """
 	if returnscene:
-		log(os.popen("{0} swap_scenes \"{1}\" {2} \"{3}\"".format(BridgeApp, scene, delay, returnscene)).read())
+		os.popen("{0} swap_scenes \"{1}\" {2} \"{3}\"".format(BridgeApp, scene, delay, returnscene)).read()
 	else:
-		log(os.popen("{0} swap_scenes \"{1}\" {2}".format(BridgeApp, scene, delay)).read())
+		os.popen("{0} swap_scenes \"{1}\" {2}".format(BridgeApp, scene, delay)).read()
 	return
 
 def SetSourceVisibility(source, visibility, scene=None):
 	""" Set the visibility of a source optionally in a targeted scene. """
 	if scene:
-		log(os.popen("{0} visibility_source_scene \"{1}\" \"{2}\" {3}".format(BridgeApp, source, scene, visibility)).read())
+		os.popen("{0} visibility_source_scene \"{1}\" \"{2}\" {3}".format(BridgeApp, source, scene, visibility)).read()
 	else:
-		log(os.popen("{0} visibility_source_active \"{1}\" {2}".format(BridgeApp, source, visibility)).read())
+		os.popen("{0} visibility_source_active \"{1}\" {2}".format(BridgeApp, source, visibility)).read()
 	return
 
 def SetSourceVisibilityTimed(source, mode, delay, scene=None):
 	""" Set the visibility of a source timed optionally in a targeted scene. """
 	if scene:
-		log(os.popen("{0} tvisibility_source_scene \"{1}\" \"{2}\" {3} {4}".format(BridgeApp, source, scene, delay, mode)).read())
+		os.popen("{0} tvisibility_source_scene \"{1}\" \"{2}\" {3} {4}".format(BridgeApp, source, scene, delay, mode)).read()
 	else:
-		log(os.popen("{0} tvisibility_source_active \"{1}\" {2} {3}".format(BridgeApp, source, delay, mode)).read())
+		os.popen("{0} tvisibility_source_active \"{1}\" {2} {3}".format(BridgeApp, source, delay, mode)).read()
 	return
 
 def SetFolderVisibility(folder, visibility, scene=None):
 	""" Set the visibility of a folder optinally in a targeted scene. """
 	#Parent.Log("functest", "{0} and {1} on {2}".format(folder, visibility, scene))
 	if scene:
-		log(os.popen("{0} visibility_folder_scene \"{1}\" \"{2}\" {3}".format(BridgeApp, folder, scene, visibility)).read())
+		os.popen("{0} visibility_folder_scene \"{1}\" \"{2}\" {3}".format(BridgeApp, folder, scene, visibility)).read()
 	else:
-		log(os.popen("{0} visibility_folder_active \"{1}\" {2}".format(BridgeApp, folder, visibility)).read())
+		os.popen("{0} visibility_folder_active \"{1}\" {2}".format(BridgeApp, folder, visibility)).read()
 	return
 
 def SetFolderVisibilityTimed(folder, mode, delay, scene=None):
 	""" Set the visibility of a folder timed optionally in a targeted scene. """
 	if scene:
-		log(os.popen("{0} tvisibility_folder_scene \"{1}\" \"{2}\" {3} {4}".format(BridgeApp, folder, scene, delay, mode)).read())
+		os.popen("{0} tvisibility_folder_scene \"{1}\" \"{2}\" {3} {4}".format(BridgeApp, folder, scene, delay, mode)).read()
 	else:
-		log(os.popen("{0} tvisibility_folder_active \"{1}\" {2} {3}".format(BridgeApp, folder, delay, mode)).read())
+		os.popen("{0} tvisibility_folder_active \"{1}\" {2} {3}".format(BridgeApp, folder, delay, mode)).read()
 	return
 
 def SaveReplaySwap(scene, offset=None):
 	""" Save the replay and swap to a given "replay" scene. """
 	if offset:
-		log(os.popen("{0} save_replaybuffer_swap \"{1}\" {2}".format(BridgeApp, scene, offset)).read())
+		os.popen("{0} save_replaybuffer_swap \"{1}\" {2}".format(BridgeApp, scene, offset)).read()
 	else:
-		log(os.popen("{0} save_replaybuffer_swap \"{1}\"".format(BridgeApp, scene)).read())
+		os.popen("{0} save_replaybuffer_swap \"{1}\"".format(BridgeApp, scene)).read()
 	return
 
 def ThreadedFunction(command):
-	log(os.popen("{0} {1}".format(BridgeApp, command)).read())
+	os.popen("{0} {1}".format(BridgeApp, command)).read()
 	return
 
 #---------------------------------------

@@ -29,7 +29,7 @@
     "type": "checkbox",
     "value": true,
     "label": "Exclude Last Gif",
-    "tooltip": "Exclude the last played gif from selection for next gif.",
+    "tooltip": "Exclude the last two played gifs from selection for next gif.",
     "group": "GIF Settings:"
   }
 }
