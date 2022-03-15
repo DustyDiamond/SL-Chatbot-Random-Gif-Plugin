@@ -174,7 +174,7 @@ def Execute(data):
         
 
         gif = game + "-" + str(number)
-        log("Max: " + str(max) + " - Rand: " + str(number))
+        #log("Max: " + str(max) + " - Rand: " + str(number))
         
         delay = str(settings["delay"])
         #message = '$SLOBSsourceT("' + gif + '", "onoff", "' + delay + '", "gifs")'
@@ -198,7 +198,7 @@ def exclusive_rand(x):
             reduced_list = list(s)
 
         i = random.randint(1,len(reduced_list))
-        log("i: " + str(i))
+        #log("i: " + str(i))
         last.append(reduced_list[i-1])
         if len(last)>y:
             last.pop(0)
