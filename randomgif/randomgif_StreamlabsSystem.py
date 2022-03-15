@@ -41,7 +41,7 @@ RegObsSwap = None
 RegObsReplaySwap = None
 
 # misc
-global  settings, game, work_dir, last
+global settings, game, work_dir
 settings = {}
 game = ""
 work_dir = ""
@@ -122,7 +122,7 @@ def send_message(message):
 # twitch chat. data contains info about message and user etc
 #---------------------------------------------------------
 def Execute(data):
-    global game, settings, last
+    global game, settings
     message = ""
     max = 0
     number = 0
@@ -174,7 +174,7 @@ def Execute(data):
         
 
         gif = game + "-" + str(number)
-        #log("Max: " + str(max) + " - Rand: " + str(number))
+        log("Max: " + str(max) + " - Rand: " + str(number))
         
         delay = str(settings["delay"])
         #message = '$SLOBSsourceT("' + gif + '", "onoff", "' + delay + '", "gifs")'
@@ -188,16 +188,24 @@ def exclusive_rand(x):
     y = 2
     if x <= y:
         y = 1
-    if (settings["notlast"]) :
-        s = set(range(0,x+y))
-        reduced_list = list(s-(set(last)))
+        settings["notlast"] = False 
+
+    if (settings["notlast"]):
+        s = set(range(1,x+y))
+        if x>y:
+            reduced_list = list(s-(set(last)))
+        else:
+            reduced_list = list(s)
+
         i = random.randint(1,len(reduced_list))
-        last.append(reduced_list[i])
+        log("i: " + str(i))
+        last.append(reduced_list[i-1])
         if len(last)>y:
             last.pop(0)
-        ret = reduced_list[i]
+        ret = reduced_list[i-1]
     else:
         ret = random.randint(1,x)
+        settings["notlast"] = True 
 
     return ret
 
