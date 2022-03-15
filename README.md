@@ -1,7 +1,7 @@
 # RandomGIF
 
 ![GitHub release (release name instead of tag name)](https://img.shields.io/github/v/release/dustydiamond/SL-Chatbot-Random-Gif-Plugin?include_prereleases&sort=date) ![GitHub](https://img.shields.io/github/license/DustyDiamond/SL-Chatbot-Random-Gif-Plugin)
- 
+
 Chooses a random gif suitable for the current game you play on twitch.  
 Simply import every gif you want to display in a special scene in SLOBS.  
 Name your Gif-Sources as `<game-name>-<nr> (heroesofthestorm-1)` make sure there aren't any duplicate numbers and that there isn't a number missing.  
