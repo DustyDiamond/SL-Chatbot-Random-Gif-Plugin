@@ -7,6 +7,7 @@ import os
 import json
 import codecs
 import random
+import time
 from shutil import copyfile
 from datetime import datetime
 
@@ -22,8 +23,8 @@ import threading
 ScriptName = "Random Gif Command"
 Website = "http://www.dustydiamond.de/"
 Description = "Chooses a suitable gif for the game you're streaming on twitch."
-Creator = "DustyDiamond"
-Version = "1.0.4"
+Creator = "DustyDiamond / Ocgineer"
+Version = "1.1.0"
 Command = "!gif"
 
 #---------------------------------------------------------
@@ -31,21 +32,28 @@ Command = "!gif"
 #---------------------------------------------------------
 # SLOBS RC
 BridgeApp = os.path.join(os.path.dirname(__file__), "bridge\\SLOBSRC.exe")
+RegSLObsScene = None
+RegSLObsGetItems = None
+RegSLObsSource = None
+RegSLObsSourceT = None
+RegSLObsFolder = None
+RegSLObsFolderT = None
+RegSLObsSwap = None
+RegSLObsReplaySwap = None
+
+#OBS RC
 RegObsScene = None
-RegObsGetItems = None
 RegObsSource = None
-RegObsSourceT = None
-RegObsFolder = None
-RegObsFolderT = None
-RegObsSwap = None
-RegObsReplaySwap = None
+RegObsTmdSrc = None
+RegObsTmdScn = None
 
 # misc
-global settings, game, work_dir
+global settings, game, work_dir, streamingService
 settings = {}
 game = ""
 work_dir = ""
 last = []
+streamingService = ""
 
 #---------------------------------------------------------
 # Functions
@@ -56,27 +64,40 @@ last = []
 def Init():
     # Init for SLOBS RC
     # Globals
-    global RegObsScene
-    global RegObsGetItems
-    global RegObsSource
-    global RegObsSourceT
-    global RegObsFolder
-    global RegObsFolderT
-    global RegObsSwap
-    global RegObsReplaySwap
+    global RegSLObsScene
+    global RegSLObsGetItems
+    global RegSLObsSource
+    global RegSLObsSourceT
+    global RegSLObsFolder
+    global RegSLObsFolderT
+    global RegSLObsSwap
+    global RegSLObsReplaySwap
     # Compile regexes in init
-    RegObsScene = re.compile(r"(?:\$SLOBSscene\([\ ]*[\"\'](?P<scene>[^\"\']+)[\"\'][\ ]*(?:\,[\ ]*[\"\'](?P<delay>\d*)[\"\'][\ ]*)?\))", re.U)
-    RegObsGetItems = re.compile(r"(?:\$SLOBSgetItems\([\ ]*[\"\'](?P<scene>[^\"\']+)[\"\'][\ ]*)?\)", re.U)
-    RegObsSource = re.compile(r"(?:\$SLOBSsource\([\ ]*[\"\'](?P<source>[^\"\']+)[\"\'][\ ]*\,[\ ]*[\"\'](?P<visibility>[^\"\']*)[\"\'][\ ]*(?:\,[\ ]*[\"\'](?P<scene>[^\"\']*)[\"\'][\ ]*)?\))", re.U)
-    RegObsSourceT = re.compile(r"(?:\$SLOBSsourceT\([\ ]*[\"\'](?P<source>[^\"\']+)[\"\'][\ ]*\,[\ ]*[\"\'](?P<mode>[^\"\']*)[\"\'][\ ]*\,[\ ]*[\"\'](?P<delay>\d+)[\"\'][\ ]*(?:\,[\ ]*[\"\'](?P<scene>[^\"\']*)[\"\'][\ ]*)?\))", re.U)
-    RegObsFolder = re.compile(r"(?:\$SLOBSfolder\([\ ]*[\"\'](?P<folder>[^\"\']+)[\"\'][\ ]*\,[\ ]*[\"\'](?P<visibility>[^\"\']*)[\"\'][\ ]*(?:\,[\ ]*[\"\'](?P<scene>[^\"\']*)[\"\'][\ ]*)?\))", re.U)
-    RegObsFolderT = re.compile(r"(?:\$SLOBSfolderT\([\ ]*[\"\'](?P<folder>[^\"\']+)[\"\'][\ ]*\,[\ ]*[\"\'](?P<mode>[^\"\']*)[\"\'][\ ]*\,[\ ]*[\"\'](?P<delay>\d+)[\"\'][\ ]*(?:\,[\ ]*[\"\'](?P<scene>[^\"\']*)[\"\'][\ ]*)?\))", re.U)
-    RegObsSwap = re.compile(r"(?:\$SLOBSswap\([\ ]*[\"\'](?P<scene>[^\"\']+)[\"\'][\ ]*\,[\ ]*[\"\'](?P<delay>\d*)[\"\'][\ ]*(?:\,[\ ]*[\"\'](?P<returnscene>[^\"\']*)[\"\'][\ ]*)?\))", re.U)
-    RegObsReplaySwap = re.compile(r"(?:\$SLOBSsaveReplaySwap\([\ ]*[\"\'](?P<scene>[^\"\']+)[\"\'][\ ]*(?:\,[\ ]*[\"\'](?P<offset>\d+)[\"\'][\ ]*)?\))", re.U)
+    RegSLObsScene = re.compile(r"(?:\$SLOBSscene\([\ ]*[\"\'](?P<scene>[^\"\']+)[\"\'][\ ]*(?:\,[\ ]*[\"\'](?P<delay>\d*)[\"\'][\ ]*)?\))", re.U)
+    RegSLObsGetItems = re.compile(r"(?:\$SLOBSgetItems\([\ ]*[\"\'](?P<scene>[^\"\']+)[\"\'][\ ]*)?\)", re.U)
+    RegSLObsSource = re.compile(r"(?:\$SLOBSsource\([\ ]*[\"\'](?P<source>[^\"\']+)[\"\'][\ ]*\,[\ ]*[\"\'](?P<visibility>[^\"\']*)[\"\'][\ ]*(?:\,[\ ]*[\"\'](?P<scene>[^\"\']*)[\"\'][\ ]*)?\))", re.U)
+    RegSLObsSourceT = re.compile(r"(?:\$SLOBSsourceT\([\ ]*[\"\'](?P<source>[^\"\']+)[\"\'][\ ]*\,[\ ]*[\"\'](?P<mode>[^\"\']*)[\"\'][\ ]*\,[\ ]*[\"\'](?P<delay>\d+)[\"\'][\ ]*(?:\,[\ ]*[\"\'](?P<scene>[^\"\']*)[\"\'][\ ]*)?\))", re.U)
+    RegSLObsFolder = re.compile(r"(?:\$SLOBSfolder\([\ ]*[\"\'](?P<folder>[^\"\']+)[\"\'][\ ]*\,[\ ]*[\"\'](?P<visibility>[^\"\']*)[\"\'][\ ]*(?:\,[\ ]*[\"\'](?P<scene>[^\"\']*)[\"\'][\ ]*)?\))", re.U)
+    RegSLObsFolderT = re.compile(r"(?:\$SLOBSfolderT\([\ ]*[\"\'](?P<folder>[^\"\']+)[\"\'][\ ]*\,[\ ]*[\"\'](?P<mode>[^\"\']*)[\"\'][\ ]*\,[\ ]*[\"\'](?P<delay>\d+)[\"\'][\ ]*(?:\,[\ ]*[\"\'](?P<scene>[^\"\']*)[\"\'][\ ]*)?\))", re.U)
+    RegSLObsSwap = re.compile(r"(?:\$SLOBSswap\([\ ]*[\"\'](?P<scene>[^\"\']+)[\"\'][\ ]*\,[\ ]*[\"\'](?P<delay>\d*)[\"\'][\ ]*(?:\,[\ ]*[\"\'](?P<returnscene>[^\"\']*)[\"\'][\ ]*)?\))", re.U)
+    RegSLObsReplaySwap = re.compile(r"(?:\$SLOBSsaveReplaySwap\([\ ]*[\"\'](?P<scene>[^\"\']+)[\"\'][\ ]*(?:\,[\ ]*[\"\'](?P<offset>\d+)[\"\'][\ ]*)?\))", re.U)
+
+    # Init for OBS Studio RC
+    # Globals
+    global RegObsScene
+    global RegObsSource
+    global RegObsTmdSrc
+    global RegObsTmdScn
+
+    # Compile regexes in init
+    RegObsScene = re.compile(r"(?:\$OBSscene\([\ ]*[\"\'](?P<scene>[^\"\']+)[\"\'][\ ]*(?:\,[\ ]*[\"\'](?P<delay>\d*)[\"\'][\ ]*)?\))", re.U)
+    RegObsSource = re.compile(r"(?P<full>\$OBSsource\([\ ]*[\"\'](?P<source>[^\"\']+)[\"\'][\ ]*\,[\ ]*[\"\'](?P<enabled>[^\"\']*)[\"\'][\ ]*(?:\,[\ ]*[\"\'](?P<scene>[^\"\']*)[\"\'][\ ]*)?\))", re.U)
+    RegObsTmdScn = re.compile(r"(?P<full>\$OBStimedScene\([\ ]*[\"\'](?P<s1>[^\"\']+)[\"\'][\ ]*\,[\ ]*[\"\'](?P<s2>[^\"\']+)[\"\'][\ ]*\,[\ ]*[\"\'](?P<delay>\d+)[\"\'][\ ]*\))", re.U)
+    RegObsTmdSrc = re.compile(r"(?P<full>\$OBStimedSource\([\ ]*[\"\'](?P<source>[^\"\']+)[\"\'][\ ]*\,[\ ]*[\"\'](?P<mode>onoff|offon)[\"\'][\ ]*\,[\ ]*[\"\'](?P<delay>\d+)[\"\'][\ ]*(?:\,[\ ]*[\"\'](?P<scene>[^\"\']*)[\"\'][\ ]*)?\))", re.U)
 
     # Init for rest of script
     # Globals misc
-    global settings, work_dir
+    global settings, work_dir, streamingService
 
 
     work_dir = os.path.dirname(__file__)
@@ -95,8 +116,11 @@ def Init():
             "onCooldown": "$user, $command is still on cooldown for $cd seconds!",
 	        "onUserCooldown": "$user, $command is still on user cooldown for $cd seconds! ",
             "delay": 2,
-            "scene": "gifs"
+            "scene": "gifs",
+            "programm": "SLOBS"
         }
+
+    
 
     return
 
@@ -131,12 +155,13 @@ def Execute(data):
     game = game.replace(" ", "").lower()
     scene = settings["scene"]
     scene_list = []
+    streamingService = settings["programm"] 
 
     # !getgame command to put game as interpreted in script in the chat for naming purposes
     if data.IsChatMessage() and data.GetParam(0) == "!getgame" and Parent.HasPermission(data.User, "Moderator", ""):
         message = "Current Game is: " + game
 
-    # main branch 
+    # main branch (gif) 
     if data.IsChatMessage() and data.GetParam(0) == settings["command"]:
         # get Max from Nr of Sources in Scene
         bridge_answer = GetItems(scene)
@@ -177,10 +202,18 @@ def Execute(data):
         #log("Max: " + str(max) + " - Rand: " + str(number))
         
         delay = str(settings["delay"])
-        #message = '$SLOBSsourceT("' + gif + '", "onoff", "' + delay + '", "gifs")'
-        SetSourceVisibilityTimed(gif,"onoff",delay,scene)
         
-    send_message(message)
+        if streamingService == "SLOBS":
+            SetSourceVisibilityTimed(gif,"onoff",delay,scene)
+            #message = '$SLOBSsourceT("' + gif + '", "onoff", "' + delay + '", "' + scene + '")'
+            #log('$SLOBSsourceT("' + gif + '", "onoff", "' + delay + '", "' + scene + '")')
+        elif streamingService == "OBS Studio":
+            VisibilitySourceTimed(gif,"onoff",float(delay),scene)
+            #message = '$OBStimedSource("' + gif + '", "onoff", "' + delay + '", "' + scene + '")'
+            #log('$OBStimedSource("' + gif + '", "onoff", "' + delay + '", "' + scene + '")')
+
+        
+    #send_message(message)
     return
 
 def exclusive_rand(x):
@@ -287,12 +320,12 @@ def SetSourceVisibility(source, visibility, scene=None):
 	return
 
 def SetSourceVisibilityTimed(source, mode, delay, scene=None):
-	""" Set the visibility of a source timed optionally in a targeted scene. """
-	if scene:
-		os.popen("{0} tvisibility_source_scene \"{1}\" \"{2}\" {3} {4}".format(BridgeApp, source, scene, delay, mode)).read()
-	else:
-		os.popen("{0} tvisibility_source_active \"{1}\" {2} {3}".format(BridgeApp, source, delay, mode)).read()
-	return
+    """ Set the visibility of a source timed optionally in a targeted scene. """
+    if scene:
+        os.popen("{0} tvisibility_source_scene \"{1}\" \"{2}\" {3} {4}".format(BridgeApp, source, scene, delay, mode)).read()
+    else:
+        os.popen("{0} tvisibility_source_active \"{1}\" {2} {3}".format(BridgeApp, source, delay, mode)).read()
+    return
 
 def SetFolderVisibility(folder, visibility, scene=None):
 	""" Set the visibility of a folder optinally in a targeted scene. """
@@ -324,14 +357,63 @@ def ThreadedFunction(command):
 	return
 
 #---------------------------------------
+# OBS Studio Functions
+#---------------------------------------
+def CallbackLogger(response):
+	""" Logs callback error response in scripts logger. """
+	parsedresponse = json.loads(response)
+	if parsedresponse["status"] == "error":
+		Parent.Log("OBS Remote", parsedresponse["error"])
+	return
+
+def ChangeToScene(scene, delay=None):
+	""" Swaps to a given scene, optionally after given amount of seconds. """
+	if delay:
+		time.sleep(delay)
+	Parent.SetOBSCurrentScene(scene, CallbackLogger)
+	return
+
+def SetSourceVisibility(source, enabled, scene=None):
+	""" Set the targeted source visibility optionally in a scene. """
+	Parent.SetOBSSourceRender(source, enabled, scene, CallbackLogger)
+	return
+
+def ChangeScenesTimed(scene_one, scene_two, delay):
+	""" Swap to one scene then to another scene after a set delay. """
+	Parent.SetOBSCurrentScene(scene_one, CallbackLogger)
+	if delay:
+		time.sleep(delay)
+	Parent.SetOBSCurrentScene(scene_two, CallbackLogger)
+	return
+
+def VisibilitySourceTimed(source, mode, delay, scene):
+	""" Disables a given source in optional scene after given amount of seconds. """
+	# off - delay - off
+	if mode == "offon":
+		Parent.SetOBSSourceRender(source, False, scene, CallbackLogger)
+		if delay:
+			time.sleep(delay)
+		Parent.SetOBSSourceRender(source, True, scene, CallbackLogger)
+	# on - delay - off
+	else:
+		Parent.SetOBSSourceRender(source, True, scene, CallbackLogger)
+		if delay:
+			time.sleep(delay)
+		Parent.SetOBSSourceRender(source, False, scene, CallbackLogger)
+	# done
+	return
+
+#---------------------------------------
 # Parse parameters
+#---------------------------------------
+# SLOBS
 #---------------------------------------
 def Parse(parseString, user, target, message):
     """ Custom Parameter Parser. """
 
     # $SLOBSgetItems("scene")
     if "$SLOBSgetItems" in parseString:
-        result = RegObsGetItems.search(parseString)
+        result = RegSLObsGetItems.search(parseString)
         if result:
             fullParameterMatch = result.group(0)
             scene = result.group("scene")
@@ -364,7 +446,7 @@ def Parse(parseString, user, target, message):
     if "$SLOBSswap" in parseString:
 	
 		# Apply regex to verify correct parameter use
-        result = RegObsSwap.search(parseString)
+        result = RegSLObsSwap.search(parseString)
         if result:
 
 			# Get results from regex match
@@ -384,7 +466,7 @@ def Parse(parseString, user, target, message):
     if "$SLOBSsourceT" in parseString:
 
 		# Apply regex to verify correct parameter use
-        result = RegObsSourceT.search(parseString)
+        result = RegSLObsSourceT.search(parseString)
         if result:
 
 			# Get match groups from regex
@@ -425,7 +507,7 @@ def Parse(parseString, user, target, message):
     if "$SLOBSfolderT" in parseString:
 
 		# Apply regex to verify correct parameter use
-        result = RegObsFolderT.search(parseString)
+        result = RegSLObsFolderT.search(parseString)
         if result:
 
             # Get match groups from regex
@@ -446,7 +528,7 @@ def Parse(parseString, user, target, message):
     if "$SLOBSfolder" in parseString:
 
 		# Apply regex to verify correct parameter use
-        result = RegObsFolder.search(parseString)
+        result = RegSLObsFolder.search(parseString)
         if result:
             
             # Get match groups from regex
@@ -502,7 +584,7 @@ def Parse(parseString, user, target, message):
     if "$SLOBSsaveReplaySwap" in parseString:
 
         # Apply regex to verify correct parameter use
-        result = RegObsReplaySwap.search(parseString)
+        result = RegSLObsReplaySwap.search(parseString)
         if result:		
 			
             # Get results from regex match
@@ -543,6 +625,97 @@ def Parse(parseString, user, target, message):
 #		# Replace $SLOBSstop with empty string
 #		return parseString.replace("$SLOBSstart", "")
 		    
+#---------------------------------------
+# OBS Studio
+#---------------------------------------
+
+    # $OBSscene("scene") parameter
+    # $OBSscene("scene", "delay") parameter
+    if "$OBSscene" in parseString:
+
+		# Apply regex to verify correct parameter use
+        result = RegObsScene.search(parseString)
+        if result:		
+
+			# Get results from regex match
+            fullParameterMatch = result.group(0)
+            scene = result.group("scene")
+            delay = int(result.group("delay")) if result.group("delay") else None
+
+			# Change to another scene, using threading
+            threading.Thread(target=ChangeToScene, args=(scene, delay)).start()
+
+			# Replace the whole parameter with an empty string
+            return parseString.replace(fullParameterMatch, "")
+
+	# $OBSsource("source", "enabled")
+	# $OBSsource("source", "enabled", "scene")
+    if "$OBSsource" in parseString:
+
+		# Apply regex to verify correct parameter use
+        result = RegObsSource.search(parseString)
+        if result:
+
+			# Get match groups from regex
+            fullParameterMatch = result.group(0)
+            source = result.group("source")
+            enabled = False if result.group("enabled").lower() == "false" else True
+            scene = result.group("scene") if result.group("scene") else None
+
+			# Set source visibility, using threading
+            threading.Thread(target=SetSourceVisibility, args=(source, enabled, scene)).start()		
+
+			# Replace the whole parameter with an empty string
+            return parseString.replace(fullParameterMatch, "")
+
+	# #OBStimedScene("scene_one", "scene_two", "delay")
+    if "$OBStimedScene" in parseString:
+
+		# Apply regext to verify correct parameter use
+        result = RegObsTmdScn.search(parseString)
+        if result:
+
+			# Get match groups from regex
+            fullParameterMatch = result.group(0)
+            scene1 = result.group("s1")
+            scene2 = result.group("s2")
+            delay = int(result.group("delay")) if result.group("delay") else None
+
+			# Change to scene one, then to two after set delay, using threading
+            threading.Thread(target=ChangeScenesTimed, args=(scene1, scene2, delay)).start()
+
+			# Replace the whole parameter with an empty string
+            return parseString.replace(fullParameterMatch, "")
+
+	# $OBStimedSource("source", "mode", "delay")
+	# $OBStimedSource("source", "mode", "delay", "scene")
+    if "$OBStimedSource" in parseString:
+
+		# Apply regex to verify correct parameter use
+        result = RegObsTmdSrc.search(parseString)
+        if result:
+
+			# Get match groups from regex
+            fullParameterMatch = result.group(0)
+            source = result.group("source")
+            mode = result.group("mode")
+            delay = int(result.group("delay")) if result.group("delay") else None
+            scene = result.group("scene") if result.group("scene") else None
+
+			# Start a new thread to disable the source again after amount of given seconds
+            threading.Thread(target=VisibilitySourceTimed, args=(source, mode, delay, scene)).start()
+
+			# Replace the whole parameter with an empty string
+            return parseString.replace(fullParameterMatch, "")
+
+	# $OBSstop parameter
+    if "$OBSstop" in parseString:
+
+		# Call Stop streaming
+        Parent.StopOBSStreaming(CallbackLogger)
+
+        # Replace the whole parameter with an empty string
+        return parseString.replace("$OBSstop", "")
 		    
 	# Return unaltered parseString
     return parseString

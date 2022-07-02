@@ -31,5 +31,16 @@
     "label": "Exclude Last Gif",
     "tooltip": "Exclude the last two played gifs from selection for next gif.",
     "group": "GIF Settings:"
+  },
+  "programm": {
+    "type": "dropdown",
+    "value": "SLOBS",
+    "label": "Streaming Program",
+    "tooltip": "Choose the Streaming Program you use.",
+    "items": [
+      "SLOBS",
+      "OBS Studio"
+    ],
+    "group": "GIF Settings:"
   }
 }

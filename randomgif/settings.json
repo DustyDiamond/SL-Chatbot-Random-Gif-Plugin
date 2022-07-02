@@ -8,5 +8,6 @@
     "delay": 2,
     "scene": "gifs",
     "work_dir": "",
-    "notlast": true
+    "notlast": true,
+    "programm": "SLOBS"
 }

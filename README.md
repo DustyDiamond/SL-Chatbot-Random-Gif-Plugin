@@ -10,9 +10,13 @@ You can place your gifs in the scene as you wish. Then import that "gif-scene" i
 
 You can toggle on/off if you want the the last two gifs that have been played to be excluded for the next command, so everytime there is chosen a different gif. This is especially helpful if you don't have that many gifs per game. I strongly recommend to have more than 3 gifs per game, but the more the better.  
 
+You can choose your OBS Version. Currently only Streamlabs Desktop (former Streamlabs OBS) and OBS Studio are supported.
+
 ## Dependencies  
 
 The script uses the SLOBS RC CONSOLE Application from [ocgineer](https://github.com/ocgineer). You can find it [here](https://github.com/ocgineer/SLOBS-RC-CONSOLE)  
 A custom and extended version of the Console App is built and shipped with the script so the script won't work with the original bridge application.  
 You can find docs to SLOBS RC [here](https://ocgineer.com/sl/chatbot/slobsremote.html)  
-It's used to control SLOBS from Chatbot so you have to use Streamlabs OBS to get it working.  
+It's used to control SLOBS from Chatbot so you have to use Streamlabs Desktop to get it working.  
+With Version 1.1.0 the script works with either Streamlabs Desktop or OBS Studio.
+If you use it with OBS Studio you have to enable Websocket in OBS Studio and connect your bot to your Websocket before use.
